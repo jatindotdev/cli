@@ -73,7 +73,7 @@ func main() {
 		},
 	}
 
-	commands := commandsPerExt[extension]
+	commands := commandsPerExt[extension[1:]]
 
 	if commands == nil {
 		fmt.Fprintf(os.Stderr, color.RedString("Error: we don't support `%s` extensions yet.\n"), extension)
