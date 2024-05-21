@@ -21,4 +21,5 @@ The tool accepts the following command-line arguments:
 Example usage:
 
 ```bash
-lwc --path /path/to/your/file --delimiter _ --replacer - --lowercase-only true
+lwc /path/to/your/file -d _ -r _
+```
