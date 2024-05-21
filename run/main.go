@@ -38,8 +38,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	extension := getExtension(fileName)
-	fileNameWithoutExt := strings.TrimSuffix(fileName, "."+string(extension))
+	extension := filepath.Ext(fileName)
+	fileNameWithoutExt := strings.TrimSuffix(fileName, extension)
 	remainingArgs := []string{}
 
 	for _, arg := range args[1:] {
@@ -73,18 +73,14 @@ func main() {
 		},
 	}
 
-	supportedExtensions := make([]string, 0, len(commandsPerExt))
-	for ext := range commandsPerExt {
-		supportedExtensions = append(supportedExtensions, string(ext))
-	}
+	commands := commandsPerExt[extension]
 
-	if !contains(string(extension), supportedExtensions) {
-		fmt.Fprintf(os.Stderr, color.RedString("! unsupported extension `%s`.\n"), extension)
-		fmt.Fprintln(os.Stderr, "! please raise an issue here https://github.com/jatindotdev/cli/issues")
+	if commands == nil {
+		fmt.Fprintf(os.Stderr, color.RedString("Error: we don't support `%s` extensions yet.\n"), extension)
+		fmt.Fprintln(os.Stderr, "Please raise an issue here https://github.com/jatindotdev/cli/issues")
 		os.Exit(0)
 	}
 
-	commands := commandsPerExt[extension]
 	for _, command := range commands {
 		cmdIndex := strings.Index(command, " ")
 		cmdBin := command[:cmdIndex]
