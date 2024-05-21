@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"github.com/fatih/color"
+	"github.com/jatindotdev/cli/lib"
 )
 
 const (
@@ -25,14 +26,14 @@ const (
 func main() {
 	args := os.Args[1:]
 
-	if len(args) == 0 || contains(args[0], "help", "-h", "--help") {
+	if len(args) == 0 || lib.Contains(args[0], "help", "-h", "--help") {
 		printHelp()
 		os.Exit(0)
 	}
 
 	fileName := args[0]
 
-	if !fileExists(fileName) {
+	if !lib.FileExists(fileName) {
 		fileNameWithoutDir := filepath.Base(fileName)
 		fmt.Fprintf(os.Stderr, color.RedString("Error: `%s` does not exist!\n"), fileNameWithoutDir)
 		os.Exit(1)

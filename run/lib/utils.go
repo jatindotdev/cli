@@ -1,10 +1,10 @@
-package main
+package lib
 
 import (
 	"os"
 )
 
-func contains(s string, list ...string) bool {
+func Contains(s string, list ...string) bool {
 	for _, item := range list {
 		if item == s {
 			return true
@@ -13,7 +13,7 @@ func contains(s string, list ...string) bool {
 	return false
 }
 
-func fileExists(fileName string) bool {
+func FileExists(fileName string) bool {
 	_, err := os.Stat(fileName)
 	return err == nil
 }
