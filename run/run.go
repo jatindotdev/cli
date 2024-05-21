@@ -25,7 +25,7 @@ const (
 func main() {
 	args := os.Args[1:]
 
-	if len(args) == 0 || contains(args[0], []string{"-h", "--help"}) {
+	if len(args) == 0 || contains(args[0], "help", "-h", "--help") {
 		printHelp()
 		os.Exit(0)
 	}
