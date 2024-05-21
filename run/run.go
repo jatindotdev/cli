@@ -124,6 +124,9 @@ func printHelp() {
 	color.Set(color.FgGreen)
 	fmt.Println(" [...args]")
 	color.Unset()
-	fmt.Println("  -h, --help    Show this help message")
-	fmt.Println("  [...args]     Arguments that will be passed to the command")
+	fmt.Print("\n  [...args]     Arguments that will be passed to the command\n\n")
+	color.Set(color.Bold)
+	fmt.Println("Commands:")
+	color.Unset()
+	fmt.Println("  help          Show this help message")
 }
