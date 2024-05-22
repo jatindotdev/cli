@@ -21,5 +21,10 @@ The tool accepts the following command-line arguments:
 Example usage:
 
 ```bash
+lowercase /path/to/your/file -d _ -r -
+
+# OR
+alias lwc lowercase # just do this once in your config
+
 lwc /path/to/your/file -d _ -r -
 ```
