@@ -21,5 +21,5 @@ The tool accepts the following command-line arguments:
 Example usage:
 
 ```bash
-lwc /path/to/your/file -d _ -r _
+lwc /path/to/your/file -d _ -r -
 ```
