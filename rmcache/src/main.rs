@@ -5,10 +5,33 @@ mod utils {
 use clap::Parser;
 use color_print::cprintln;
 use serde_derive::{Deserialize, Serialize};
-use std::{collections::HashMap, process::exit};
+use std::{collections::HashMap, fs, process::exit};
 
 #[derive(Parser, Debug)]
+#[clap(name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"), author = env!("CARGO_PKG_AUTHORS"), about = env!("CARGO_PKG_DESCRIPTION"))]
+#[command(arg_required_else_help = true)]
 struct CLI {
+    #[clap(short, long, help = "Clears the cache")]
+    clear: bool,
+
+    #[clap(
+        short,
+        long,
+        help = "Clears the cache for the specified id",
+        value_delimiter = ',',
+        num_args = 1..
+    )]
+    only: Option<Vec<String>>,
+
+    #[clap(
+        short,
+        long,
+        help = "Clears the cache for all ids except the specified ones",
+        value_delimiter = ',',
+        num_args = 1..
+    )]
+    disable: Option<Vec<String>>,
+
     #[clap(short, long, help = "Prints verbose information")]
     verbose: bool,
 }
@@ -78,46 +101,87 @@ fn main() {
         log_info!("Config file loaded successfully.");
     }
 
-    if config.options.disable.is_some() && config.options.only.is_some() {
-        log_error!("Both disable and only options are present, Please remove one.");
-        exit(1);
-    }
+    let only = match &cli.only {
+        Some(only) => Some(only.clone()),
+        None => config.options.only.clone(),
+    };
 
-    let paths = get_paths(&config, &cli);
+    let disable = match &cli.disable {
+        Some(disable) => Some(disable.clone()),
+        None => config.options.disable.clone(),
+    };
 
-    dbg!(&config);
-    dbg!(&cli);
-    dbg!(paths);
-}
-
-fn get_paths<'a>(config: &'a Config, cli: &'a CLI) -> HashMap<&'a String, &'a Vec<String>> {
-    if let Some(only) = &config.options.only {
-        let mut paths: HashMap<&String, &Vec<String>> = HashMap::new();
-        for (id, path) in &config.paths {
-            if only.contains(&id) {
-                paths.insert(id, path);
-            }
+    if cli.verbose {
+        if cli.only.is_some() && cli.disable.is_some() {
+            log_warn!("Both only and disable flags are provided, only flag will be used.");
         }
 
-        if cli.verbose {
+        if cli.only.is_some() && config.options.only.is_some() {
+            log_warn!(
+                "Both only flag and config only option are provided, only flag will be used."
+            );
+        }
+
+        if cli.disable.is_some() && config.options.disable.is_some() {
+            log_warn!("Both disable flag and config disable option are provided, disable flag will be used.");
+        }
+
+        if let Some(only) = &only {
             log_info!("Enabled paths: {:?}", only);
         }
-        return paths;
-    }
 
-    if let Some(disable) = &config.options.disable {
-        let mut paths: HashMap<&String, &Vec<String>> = HashMap::new();
-        for (id, path) in &config.paths {
-            if !disable.contains(&id) {
-                paths.insert(id, path);
-            }
-        }
-
-        if cli.verbose {
+        if let Some(disable) = &disable {
             log_info!("Disabled paths: {:?}", disable);
         }
-        return paths;
     }
 
-    config.paths.iter().collect()
+    let options = Options { disable, only };
+    let paths = config
+        .paths
+        .iter()
+        .filter(|(id, _)| {
+            if let Some(only) = &options.only {
+                only.contains(id)
+            } else if let Some(disable) = &options.disable {
+                !disable.contains(id)
+            } else {
+                true
+            }
+        })
+        .map(|(id, path)| {
+            let mut new_path = Vec::new();
+            for p in path.iter() {
+                let p = fs::canonicalize(p);
+                if let Ok(p) = p {
+                    new_path.push(p);
+                }
+            }
+            (id, new_path)
+        })
+        .collect::<HashMap<_, _>>();
+
+    if paths.is_empty() {
+        log_info!("No paths to clear.");
+        exit(0);
+    }
+
+    if cli.verbose {
+        log_info!("Paths to clear:");
+        for (id, path) in &paths {
+            log_info!("{}: {:?}", id, path);
+        }
+    }
+
+    if cli.clear {
+        for (id, path) in &paths {
+            log_info!("Cleaning {}", id);
+            for p in path {
+                if let Err(e) = fs::remove_dir_all(p) {
+                    log_error!("Failed to clean {}: {}", p.display(), e);
+                }
+            }
+        }
+    }
+
+    log_info!("Done.");
 }
