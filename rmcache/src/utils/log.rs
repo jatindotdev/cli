@@ -29,6 +29,6 @@ macro_rules! log_success {
 #[macro_export]
 macro_rules! log_working {
   ($($arg:tt)*) => {
-    cprintln!("<cyan>[WORKING]</> {}", format!($($arg)*))
+    cprintln!("<magenta>[WORKING]</> {}", format!($($arg)*))
   };
 }

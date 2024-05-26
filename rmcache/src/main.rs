@@ -186,5 +186,5 @@ fn main() {
         }
     }
 
-    log_success!("Cleaned cache.");
+    log_success!("Done.");
 }
