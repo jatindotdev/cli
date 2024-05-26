@@ -175,13 +175,48 @@ fn main() {
     if cli.clear {
         for (id, path) in &paths {
             log_working!("Cleaning {}", id);
+            let mut failed = false;
             for p in path {
-                if let Err(e) = fs::remove_dir_all(p) {
-                    log_error!("Failed to clean {}", p.display());
-                    if cli.verbose {
-                        log_error!("{}", e);
+                if let Ok(entries) = fs::read_dir(p) {
+                    for entry in entries {
+                        if let Ok(entry) = entry {
+                            match entry.file_type() {
+                                Ok(file_type) => {
+                                    if file_type.is_dir() {
+                                        if let Err(_) = fs::remove_dir_all(entry.path()) {
+                                            failed = true;
+                                            if cli.verbose {
+                                                log_error!(
+                                                    "Failed to remove directory: {:?}",
+                                                    entry.path()
+                                                );
+                                            }
+                                        }
+                                    } else if file_type.is_file() {
+                                        if let Err(_) = fs::remove_file(entry.path()) {
+                                            failed = true;
+                                            if cli.verbose {
+                                                log_error!(
+                                                    "Failed to remove file: {:?}",
+                                                    entry.path()
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                                Err(_) => {
+                                    failed = true;
+                                    if cli.verbose {
+                                        log_error!("Failed to get file type: {:?}", entry.path());
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            if failed {
+                log_info!("Some files were not removed.")
             }
         }
     }
