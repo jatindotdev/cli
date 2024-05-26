@@ -173,7 +173,8 @@ fn main() {
     }
 
     if cli.clear {
-        for (_, path) in &paths {
+        for (id, path) in &paths {
+            log_working!("Cleaning {}", id);
             for p in path {
                 if let Err(e) = fs::remove_dir_all(p) {
                     log_error!("Failed to clean {}", p.display());
