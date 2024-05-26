@@ -18,3 +18,10 @@ macro_rules! log_warn {
       cprintln!("<yellow>[WARN]</> {}", format!($($arg)*))
     };
 }
+
+#[macro_export]
+macro_rules! log_success {
+  ($($arg:tt)*) => {
+    cprintln!("<green>[SUCCESS]</> {}", format!($($arg)*))
+  };
+}
