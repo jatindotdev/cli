@@ -15,6 +15,12 @@ struct CLI {
     clear: bool,
 
     #[clap(
+        long,
+        help = "Does not remove any files, only prints what would be removed"
+    )]
+    dry_run: bool,
+
+    #[clap(
         short,
         long,
         help = "Clears the cache for the specified id",
@@ -171,10 +177,18 @@ fn main() {
             log_info!("{}: {:?}", id, path);
         }
     }
-
     if cli.clear {
         for (id, path) in &paths {
             log_working!("Cleaning {}", id);
+
+            if cli.dry_run {
+                log_info!("Paths to remove:");
+                for p in path {
+                    log_pointer!("{}", p.display());
+                }
+                continue;
+            }
+
             let mut failed = false;
             for p in path {
                 if let Ok(entries) = fs::read_dir(p) {

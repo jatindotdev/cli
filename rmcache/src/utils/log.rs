@@ -32,3 +32,10 @@ macro_rules! log_working {
     cprintln!("<magenta>[WORKING]</> {}", format!($($arg)*))
   };
 }
+
+#[macro_export]
+macro_rules! log_pointer {
+  ($($arg:tt)*) => {
+    cprintln!("<blue,bold>\t•</> {}", format!($($arg)*))
+  };
+}
