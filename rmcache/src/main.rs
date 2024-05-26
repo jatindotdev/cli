@@ -177,6 +177,7 @@ fn main() {
             log_info!("{}: {:?}", id, path);
         }
     }
+
     if cli.clear {
         for (id, path) in &paths {
             log_working!("Cleaning {}", id);
@@ -191,40 +192,20 @@ fn main() {
 
             let mut failed = false;
             for p in path {
-                if let Ok(entries) = fs::read_dir(p) {
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            match entry.file_type() {
-                                Ok(file_type) => {
-                                    if file_type.is_dir() {
-                                        if let Err(_) = fs::remove_dir_all(entry.path()) {
-                                            failed = true;
-                                            if cli.verbose {
-                                                log_error!(
-                                                    "Failed to remove directory: {:?}",
-                                                    entry.path()
-                                                );
-                                            }
-                                        }
-                                    } else if file_type.is_file() {
-                                        if let Err(_) = fs::remove_file(entry.path()) {
-                                            failed = true;
-                                            if cli.verbose {
-                                                log_error!(
-                                                    "Failed to remove file: {:?}",
-                                                    entry.path()
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                                Err(_) => {
+                match fs::read_dir(p) {
+                    Ok(entries) => {
+                        for entry in entries {
+                            if let Ok(entry) = entry {
+                                if let Err(_) = remove_entry(entry, &cli) {
                                     failed = true;
-                                    if cli.verbose {
-                                        log_error!("Failed to get file type: {:?}", entry.path());
-                                    }
                                 }
                             }
+                        }
+                    }
+                    Err(_) => {
+                        failed = true;
+                        if cli.verbose {
+                            log_error!("Failed to read directory: {:?}", p);
                         }
                     }
                 }
@@ -236,4 +217,32 @@ fn main() {
     }
 
     log_success!("Done.");
+}
+
+fn remove_entry(entry: fs::DirEntry, cli: &CLI) -> Result<(), ()> {
+    let path = entry.path();
+    let file_type = entry.file_type().map_err(|_| {
+        if cli.verbose {
+            log_error!("Failed to get file type: {:?}", path);
+        }
+        ()
+    })?;
+
+    if file_type.is_dir() {
+        fs::remove_dir_all(&path).map_err(|_| {
+            if cli.verbose {
+                log_error!("Failed to remove directory: {:?}", path);
+            }
+            ()
+        })?;
+    } else if file_type.is_file() {
+        fs::remove_file(&path).map_err(|_| {
+            if cli.verbose {
+                log_error!("Failed to remove file: {:?}", path);
+            }
+            ()
+        })?;
+    }
+
+    Ok(())
 }
