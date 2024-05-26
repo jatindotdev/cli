@@ -173,15 +173,17 @@ fn main() {
     }
 
     if cli.clear {
-        for (id, path) in &paths {
-            log_info!("Cleaning {}", id);
+        for (_, path) in &paths {
             for p in path {
                 if let Err(e) = fs::remove_dir_all(p) {
-                    log_error!("Failed to clean {}: {}", p.display(), e);
+                    log_error!("Failed to clean {}", p.display());
+                    if cli.verbose {
+                        log_error!("{}", e);
+                    }
                 }
             }
         }
     }
 
-    log_info!("Done.");
+    log_success!("Cleaned cache.");
 }
