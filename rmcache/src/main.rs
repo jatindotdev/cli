@@ -180,6 +180,10 @@ fn main() {
 
     if cli.clear {
         for (id, path) in &paths {
+            if path.is_empty() {
+                continue;
+            }
+
             log_working!("Cleaning {}", id);
 
             if cli.dry_run {
