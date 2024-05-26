@@ -6,3 +6,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
 color-print = "0.3.6"
+confy = "0.6.1"
+dirs = "5.0.1"
+serde = "1.0.203"
+serde_derive = "1.0.203"
