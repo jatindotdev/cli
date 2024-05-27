@@ -178,6 +178,8 @@ fn main() {
     let commands = config.commands.iter().filter(|(id, _)| {
         if let Some(only) = &only {
             only.contains(id)
+        } else if let Some(disable) = &disable {
+            !disable.contains(id)
         } else {
             true
         }
