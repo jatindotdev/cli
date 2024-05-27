@@ -166,8 +166,16 @@ fn main() {
         })
         .collect::<HashMap<_, _>>();
 
-    if paths.is_empty() {
-        log_info!("No paths to clear.");
+    let commands = config.commands.iter().filter(|(id, _)| {
+        if let Some(only) = &options.only {
+            only.contains(id)
+        } else {
+            true
+        }
+    });
+
+    if paths.is_empty() && commands.clone().count() == 0 {
+        log_info!("No paths or commands to clear.");
         exit(0);
     }
 
@@ -216,6 +224,42 @@ fn main() {
             }
             if failed {
                 log_info!("Some files were not removed.")
+            }
+        }
+
+        for (id, cmd) in commands {
+            log_working!("Executing {}", id);
+
+            if cli.dry_run {
+                log_pointer!("{}", cmd);
+                continue;
+            }
+
+            let status = std::process::Command::new("bash")
+                .arg("-c")
+                .arg(cmd)
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .stdin(std::process::Stdio::null())
+                .status();
+
+            match status {
+                Ok(status) => {
+                    if !status.success() {
+                        log_error!("Failed to execute command {}", id);
+
+                        if cli.verbose {
+                            log_error!("Command: {}", cmd);
+                            log_error!("Exit code: {}", status);
+                        }
+                    }
+                }
+                Err(e) => {
+                    log_error!("Failed to execute command: {}", cmd);
+                    if cli.verbose {
+                        log_error!("{}", e);
+                    }
+                }
             }
         }
     }
