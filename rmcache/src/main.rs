@@ -20,13 +20,8 @@ struct CLI {
     )]
     dry_run: bool,
 
-    #[clap(
-        short,
-        long,
-        help = "The shell to use for executing commands",
-        default_value = "bash"
-    )]
-    shell: String,
+    #[clap(short, long, help = "The shell to use for executing commands")]
+    shell: Option<String>,
 
     #[clap(
         short,
@@ -54,6 +49,7 @@ struct CLI {
 struct Options {
     disable: Option<Vec<String>>,
     only: Option<Vec<String>>,
+    shell: Option<String>,
 }
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
@@ -68,6 +64,7 @@ impl Default for Config {
             options: Options {
                 disable: Option::None,
                 only: Option::None,
+                shell: Option::Some("bash".to_string()),
             },
             paths: HashMap::new(),
             commands: HashMap::new(),
@@ -125,6 +122,11 @@ fn main() {
         None => config.options.disable.clone(),
     };
 
+    let shell = match &cli.shell {
+        Some(shell) => shell.clone(),
+        None => config.options.shell.unwrap_or("bash".to_string()),
+    };
+
     if cli.verbose {
         if cli.only.is_some() && cli.disable.is_some() {
             log_warn!("Both only and disable flags are provided, only flag will be used.");
@@ -149,14 +151,13 @@ fn main() {
         }
     }
 
-    let options = Options { disable, only };
     let paths = config
         .paths
         .iter()
         .filter(|(id, _)| {
-            if let Some(only) = &options.only {
+            if let Some(only) = &only {
                 only.contains(id)
-            } else if let Some(disable) = &options.disable {
+            } else if let Some(disable) = &disable {
                 !disable.contains(id)
             } else {
                 true
@@ -175,7 +176,7 @@ fn main() {
         .collect::<HashMap<_, _>>();
 
     let commands = config.commands.iter().filter(|(id, _)| {
-        if let Some(only) = &options.only {
+        if let Some(only) = &only {
             only.contains(id)
         } else {
             true
@@ -243,7 +244,7 @@ fn main() {
                 continue;
             }
 
-            let status = std::process::Command::new(&cli.shell)
+            let status = std::process::Command::new(&shell)
                 .arg("-c")
                 .arg(cmd)
                 .stdout(std::process::Stdio::null())
