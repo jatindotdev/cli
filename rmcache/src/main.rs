@@ -23,6 +23,14 @@ struct CLI {
     #[clap(
         short,
         long,
+        help = "The shell to use for executing commands",
+        default_value = "bash"
+    )]
+    shell: String,
+
+    #[clap(
+        short,
+        long,
         help = "Clears the cache for the specified id",
         value_delimiter = ',',
         num_args = 1..
@@ -235,7 +243,7 @@ fn main() {
                 continue;
             }
 
-            let status = std::process::Command::new("bash")
+            let status = std::process::Command::new(&cli.shell)
                 .arg("-c")
                 .arg(cmd)
                 .stdout(std::process::Stdio::null())
