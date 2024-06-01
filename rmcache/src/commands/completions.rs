@@ -7,12 +7,12 @@ use std::io;
 
 #[derive(clap::Parser, Debug)]
 #[clap(about = "Generates shell completions")]
-pub struct Completion {
+pub struct Completions {
     #[clap(long)]
     pub shell: Option<Shell>,
 }
 
-impl Command for Completion {
+impl Command for Completions {
     type Error = std::io::Error;
 
     fn apply(self, _: &crate::flags::Flags) -> Result<(), Self::Error> {

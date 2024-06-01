@@ -5,14 +5,14 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, Subcommand)]
 pub enum SubCommand {
-    Completion(commands::completion::Completion),
+    Completions(commands::completions::Completions),
     Clean(commands::clean::Clean),
 }
 
 impl SubCommand {
     pub fn call(self, flags: Flags) {
         match self {
-            SubCommand::Completion(cmd) => cmd.call(flags),
+            SubCommand::Completions(cmd) => cmd.call(flags),
             SubCommand::Clean(cmd) => cmd.call(flags),
         }
     }
