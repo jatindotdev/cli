@@ -18,7 +18,7 @@ A very simple but powerful tool to delete cache files and directories.
 To generate shell completions for your shell, use the `completion` subcommand. You can specify the shell using the `--shell` option, or the utility will attempt to detect your shell from the `SHELL` environment variable.
 
 ```sh
-rmcache completion --shell bash
+rmcache completions --shell bash
 ```
 
 Supported shells are `bash`, `zsh`, `fish`, `powershell`, and `elvish`.
@@ -43,7 +43,7 @@ rmcache clean
 #### Generate Shell Completions
 
 ```sh
-rmcache completion --shell zsh
+rmcache completions --shell zsh
 ```
 
 #### Clean All Caches
