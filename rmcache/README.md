@@ -3,59 +3,72 @@
 A very simple but powerful tool to delete cache files and directories.
 
 ### Features
-1. **Cache Management**: Allows users to clear or print information about cached files and directories.
-2. **Selective Clearing**: Provides options to clear the cache for specific IDs or to exclude certain IDs from clearing.
-3. **Dry Run Mode**: Users can preview the files and directories that would be removed without actually deleting them.
-4. **Shell Execution**: Supports executing custom shell commands for cache clearing.
-5. **Verbose Logging**: Offers detailed logs for operations, helping with debugging and monitoring.
-6. **Configuration Management**: Loads and stores configuration settings from a TOML file, allowing persistent user settings.
+`rmcache` is a utility designed to clear cache directories and execute cleanup commands based on a user-configurable setup. The utility offers the following features:
+
+- **Shell Completions**: Generates shell completions for supported shells (Bash, Zsh, Fish, PowerShell, Elvish).
+- **Configurable Paths**: Specify directories to clear using a configuration file.
+- **Custom Commands**: Define custom shell commands to execute as part of the cleanup process.
+- **Selective Cleaning**: Option to clean only specified caches or exclude specific caches from being cleaned.
+- **Dry Run Mode**: Option to simulate the cleaning process without actually removing any files.
 
 ### Usage
-The program is invoked from the command line and supports various options and flags for customizing its behavior. Below are the options available:
 
-- **-c, --clear**: Clears the cache.
-- **--dry-run**: Prints what would be removed without actually removing any files.
-- **-s, --shell <SHELL>**: Specifies the shell to use for executing commands (e.g., bash, zsh).
-- **-o, --only <ID>**: Clears the cache for the specified ID(s). Multiple IDs can be specified, separated by commas.
-- **-d, --disable <ID>**: Clears the cache for all IDs except the specified ones. Multiple IDs can be specified, separated by commas.
-- **-v, --verbose**: Prints verbose information about the operations being performed.
+#### Shell Completions
+
+To generate shell completions for your shell, use the `completion` subcommand. You can specify the shell using the `--shell` option, or the utility will attempt to detect your shell from the `SHELL` environment variable.
+
+```sh
+rmcache completion --shell bash
+```
+
+Supported shells are `bash`, `zsh`, `fish`, `powershell`, and `elvish`.
+
+#### Cleaning Cache
+
+The `clean` subcommand is used to clean the specified cache directories and execute cleanup commands. You can configure the paths and commands in a configuration file (`~/.config/rmcache.toml`).
+
+```sh
+rmcache clean
+```
+
+##### Options
+
+- `--dry-run`: Simulate the cleaning process without removing any files.
+- `--shell <shell>`: Specify the shell to use for executing commands (overrides config file setting).
+- `--only <ids>`: Clear the cache for the specified IDs only (comma-separated list).
+- `--disable <ids>`: Clear the cache for all IDs except the specified ones (comma-separated list).
 
 ### Example Usage
-1. **Clear the Cache**:
-    ```bash
-    ./rmcache -c
-    ```
-    This command clears the cache based on the configuration settings and the options provided.
 
-2. **Dry Run**:
-    ```bash
-    ./rmcache --dry-run
-    ```
-    This command prints what would be removed without actually deleting any files or directories.
+#### Generate Shell Completions
 
-3. **Use a Specific Shell**:
-    ```bash
-    ./rmcache -c --shell zsh
-    ```
-    This command clears the cache using the Zsh shell instead of the default shell.
+```sh
+rmcache completion --shell zsh
+```
 
-4. **Clear Cache for Specific IDs**:
-    ```bash
-    ./rmcache -c -o cache1,cache2
-    ```
-    This command clears the cache only for the specified IDs (`cache1` and `cache2`).
+#### Clean All Caches
 
-5. **Disable Clearing for Specific IDs**:
-    ```bash
-    ./rmcache -c -d cache1,cache2
-    ```
-    This command clears the cache for all IDs except `cache1` and `cache2`.
+```sh
+rmcache clean
+```
 
-6. **Verbose Logging**:
-    ```bash
-    ./rmcache -c -v
-    ```
-    This command clears the cache and provides detailed logs of the operations being performed.
+#### Clean Only Specified Caches
+
+```sh
+rmcache clean --only cache1,cache2
+```
+
+#### Clean All Except Specified Caches
+
+```sh
+rmcache clean --disable cache3
+```
+
+#### Dry Run
+
+```sh
+rmcache clean --dry-run
+```
 
 ### Example `rmcache.toml`
 
@@ -112,8 +125,10 @@ npm = "npm cache clean --force"
 go = "go clean -cache -modcache -testcache"
 ```
 
-### Additional Information
-- This file should be located at `~/.config/rmcache.toml`.
-- If the file does not exist, it will be created automatically by the program with default settings.
-- Comments in the TOML file explain the purpose of each section and setting.
-- If both the `only` and `disable` options are used, the `only` option takes precedence, meaning only the specified IDs in `only` will be cleared, and `disable` will be ignored.
+### Troubleshooting
+
+- Ensure your configuration file (`~/.config/rmcache.toml`) exists and is correctly formatted.
+- Use the `--dry-run` option to see which files and directories would be affected before performing the actual clean-up.
+- For verbose output, increase the verbosity level by modifying your configuration or using appropriate command-line flags.
+
+With `rmcache`, managing and cleaning up your cache directories becomes a straightforward and configurable process, tailored to your specific needs.
